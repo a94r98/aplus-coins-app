@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../shared/widgets/glass_card.dart';
 import '../../shared/widgets/vip_badge.dart';
@@ -19,6 +20,29 @@ class ProfileTab extends StatefulWidget {
 }
 
 class _ProfileTabState extends State<ProfileTab> {
+
+  Future<void> _launchURL(String urlString, bool isAr) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                isAr ? 'تعذر فتح الرابط' : 'Could not launch URL',
+                style: const TextStyle(fontFamily: 'Cairo'),
+              ),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error launching URL: $e');
+    }
+  }
 
   void _showEditProfileDialog(String currentName, AuthController auth, HomeController home) {
     final ctrl = TextEditingController(text: currentName);
@@ -477,15 +501,7 @@ class _ProfileTabState extends State<ProfileTab> {
         ? 'تطبيق A Plus Coins هو التطبيق العربي الرائد لربح المكافآت والعملات الرقمية من خلال مشاهدة الإعلانات وتأدية المهام اليومية البسيطة. يتيح لك التطبيق جمع العملات واستبدالها بالعديد من كروت الاتصال والألعاب والهدايا المميزة من المتجر.\n\nرقم الإصدار: 1.0.0'
         : 'A Plus Coins is the leading rewards app in the Arab world, allowing users to earn coins by watching advertisements and completing simple daily tasks. Redeem your accumulated coins for mobile cards, game vouchers, and premium rewards directly from the store.\n\nVersion: 1.0.0';
 
-    final String privacyTitle = isAr ? 'سياسة الخصوصية' : 'Privacy Policy';
-    final String privacyContent = isAr
-        ? 'نحن في تطبيق A Plus Coins نهتم بحماية خصوصيتك وبياناتك الشخصية بشكل كامل.\n\n1. جمع البيانات: نقوم بجمع البريد الإلكتروني لتسجيل وتأمين حسابك، وتأكيد بيانات المحفظة لإيصال جوائزك.\n\n2. أمان الجهاز: يتم جمع معرف الجهاز الرقمي (Fingerprint) فقط لضمان منع سوء الاستخدام ومكافحة الأنشطة احتيالية المتعددة على جهاز واحد.\n\n3. عدم مشاركة البيانات: نلتزم بعدم مشاركة أو بيع أي من بياناتك الشخصية لأي جهات إعلانية أو تجارية خارجية.'
-        : 'At A Plus Coins, we care about protecting your privacy and security.\n\n1. Data Collection: We collect your email address for account authentication and security purposes, and payout details to process your rewards.\n\n2. Device Verification: We collect unique device identifiers to verify compliance, prevent fraud, and block multi-account exploitation on a single device.\n\n3. Data Safety: Your personal information is kept strictly confidential and is never shared or sold to third-party marketing agencies.';
 
-    final String termsTitle = isAr ? 'الشروط والأحكام' : 'Terms & Conditions';
-    final String termsContent = isAr
-        ? 'باستخدامك للتطبيق، فإنك تقر وتوافق على الالتزام بكافة الشروط التالية:\n\n1. الاستخدام العادل: يمنع منعاً باتاً استخدام برامج المحاكاة (Emulators)، أو الـ VPN، أو الـ Bots لمشاهدة الإعلانات أو توليد أرباح احتيالية.\n\n2. سلامة الحساب: أي محاولة للتلاعب بثغرات النظام أو استنساخ التطبيق ستؤدي لتجميد الحساب فوراً وحظر صاحبه بشكل دائم من سحب أي رصيد.\n\n3. تعديل القوانين: يحق لإدارة التطبيق تعديل قيم المكافآت أو شروط السحب بما يتوافق مع استقرار واقتصاد التطبيق.'
-        : 'By using A Plus Coins, you agree to comply with the following terms and conditions:\n\n1. Fair Play: Using emulators, VPNs, proxies, auto-clickers, or bots to watch advertisements and generate unfair earnings is strictly prohibited.\n\n2. Account Suspensions: Any attempt to exploit system bugs, bypass security checks, or clone the application will result in immediate and permanent account suspension.\n\n3. Adjustments: The application administration reserves the right to modify conversion rates, reward distributions, or minimum limits to maintain economic balance.';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -799,7 +815,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         ),
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
-                      onTap: () => _showInfoDialog(privacyTitle, privacyContent, isAr),
+                      onTap: () => _launchURL('https://a94r98.github.io/aplus-coins-app/privacy.html', isAr),
                     ),
                     const Divider(height: 8, color: AppColors.cardBorder),
                     ListTile(
@@ -822,7 +838,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         ),
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
-                      onTap: () => _showInfoDialog(termsTitle, termsContent, isAr),
+                      onTap: () => _launchURL('https://a94r98.github.io/aplus-coins-app/terms.html', isAr),
                     ),
                   ],
                 ),
