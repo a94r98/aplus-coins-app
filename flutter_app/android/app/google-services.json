@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1098109693412",
+    "project_id": "a-plus-coins-app",
+    "storage_bucket": "a-plus-coins-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1098109693412:android:01b591b97e6bdd3a57ebf1",
+        "android_client_info": {
+          "package_name": "com.adreward.platform.flutter_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWlzVdF_PlLwsGK-nUIAKJN-KiSuWCma0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
