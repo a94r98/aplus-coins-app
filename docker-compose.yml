@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: reward_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super_secure_db_password_123
+      POSTGRES_DB: reward_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: >
+      postgres
+      -c max_connections=200
+      -c shared_buffers=512MB
+      -c effective_cache_size=1536MB
+      -c maintenance_work_mem=128MB
+      -c checkpoint_completion_target=0.9
+      -c checkpoint_timeout=15min
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c work_mem=4MB
+    networks:
+      - reward_network
+
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    container_name: reward_pgbouncer
+    ports:
+      - "6432:6432"
+    environment:
+      - PGBOUNCER_DATABASE=reward_db
+      - PGBOUNCER_PORT=6432
+      - POSTGRESQL_HOST=postgres
+      - POSTGRESQL_PORT=5432
+      - POSTGRESQL_USERNAME=postgres
+      - POSTGRESQL_PASSWORD=super_secure_db_password_123
+      - PGBOUNCER_POOL_MODE=transaction
+      - PGBOUNCER_MAX_CLIENT_CONN=1000
+      - PGBOUNCER_DEFAULT_POOL_SIZE=50
+      - PGBOUNCER_IGNORE_STARTUP_PARAMETERS=extra_float_digits
+    depends_on:
+      - postgres
+    networks:
+      - reward_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: reward_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - reward_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: reward_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:super_secure_db_password_123@pgbouncer:6432/reward_db
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=super_secret_jwt_key_change_me_in_production_987654321
+      - JWT_EXPIRES_IN=24h
+      - COOLDOWN_SECONDS=30
+      - DAILY_AD_LIMIT_FREE=5
+      - DAILY_AD_LIMIT_VIP1=10
+      - DAILY_AD_LIMIT_VIP2=20
+      - DAILY_AD_LIMIT_VIP3=40
+      - MIN_WITHDRAWAL=10
+    depends_on:
+      - pgbouncer
+      - redis
+    networks:
+      - reward_network
+
+volumes:
+  pgdata:
+
+networks:
+  reward_network:
+    driver: bridge
