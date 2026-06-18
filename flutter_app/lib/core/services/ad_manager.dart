@@ -21,12 +21,12 @@ class AdManager {
     // 2. Initialize Unity Ads
     try {
       await UnityAds.init(
-        gameId: '54321', // Google/Android test game ID (will be replaced by user's production ID)
-        testMode: true,
+        gameId: '800076563', // Unity Game ID
+        testMode: false, // Set to false for production
         onComplete: () {
           print('✅ Unity Ads SDK initialized.');
           // Pre-load Unity ads
-          UnityAds.load(placementId: 'rewardedVideo');
+          UnityAds.load(placementId: 'Rewarded_Android');
         },
         onFailed: (error, message) {
           print('❌ Unity Ads SDK initialization failed: $error - $message');
@@ -52,8 +52,8 @@ class AdManager {
     required Function() onUserEarnedReward,
     required Function(String error) onAdFailed,
   }) {
-    // Android Test unit ID, iOS Test unit ID
-    final adUnitId = 'ca-app-pub-3940256099942544/5224354917'; 
+    // Production AdMob Rewarded unit ID
+    final adUnitId = 'ca-app-pub-8139134711286467/3301002637'; 
 
     RewardedAd.load(
       adUnitId: adUnitId,
@@ -89,16 +89,16 @@ class AdManager {
     required Function(String error) onAdFailed,
   }) {
     UnityAds.showVideoAd(
-      placementId: 'rewardedVideo',
+      placementId: 'Rewarded_Android',
       onComplete: (placementId) {
         onUserEarnedReward();
         // Load the next ad for caching
-        UnityAds.load(placementId: 'rewardedVideo');
+        UnityAds.load(placementId: 'Rewarded_Android');
       },
       onFailed: (placementId, error, message) {
         onAdFailed('$error: $message');
         // Retry loading
-        UnityAds.load(placementId: 'rewardedVideo');
+        UnityAds.load(placementId: 'Rewarded_Android');
       },
       onStart: (placementId) => print('Unity Video Ad Started: $placementId'),
       onClick: (placementId) => print('Unity Video Ad Clicked: $placementId'),
