@@ -8,11 +8,21 @@ import 'features/ads/ads_controller.dart';
 import 'features/wallet/wallet_controller.dart';
 import 'shared/theme/app_theme.dart';
 import 'core/constants/config.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'core/services/push_notification_service.dart';
 import 'core/services/ad_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Initialize Firebase (wrapped in try-catch to allow graceful fallback if config files are not present yet)
+  try {
+    await Firebase.initializeApp();
+    await PushNotificationService.initialize();
+  } catch (e) {
+    debugPrint('Firebase initialization skipped/failed: $e');
+  }
+
   // Initialize ad networks asynchronously in the background to prevent app launch delays
   AdManager.initialize();
 
