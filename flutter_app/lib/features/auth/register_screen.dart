@@ -46,28 +46,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         final List<dynamic> list = res['data'];
         final List<Map<String, String>> mapped = list.map((item) {
           final code = item['code'] as String;
-          String flag = '🌍';
-          if (code == 'IQ') {
-            flag = '🇮🇶';
-          } else if (code == 'SA') {
-            flag = '🇸🇦';
-          } else if (code == 'AE') {
-            flag = '🇦🇪';
-          } else if (code == 'TR') {
-            flag = '🇹🇷';
-          }
+          final dialCode = item['dial_code'] as String? ?? '+1';
+          final flag = item['flag'] as String? ?? '🌍';
           
-          String dialCode = '+1';
-          if (code == 'IQ') {
-            dialCode = '+964';
-          } else if (code == 'SA') {
-            dialCode = '+966';
-          } else if (code == 'AE') {
-            dialCode = '+971';
-          } else if (code == 'TR') {
-            dialCode = '+90';
-          }
-
           return {
             'name': item['name'] as String,
             'code': dialCode,
@@ -79,8 +60,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (mapped.isNotEmpty) {
           setState(() {
             _dynamicCountries = mapped;
-            _selectedCountry = mapped[0]['name']!;
-            _selectedCountryCode = mapped[0]['code']!;
+            final defaultIdx = mapped.indexWhere((c) => c['rawCode'] == 'SA');
+            if (defaultIdx != -1) {
+              _selectedCountry = mapped[defaultIdx]['name']!;
+              _selectedCountryCode = mapped[defaultIdx]['code']!;
+            } else {
+              _selectedCountry = mapped[0]['name']!;
+              _selectedCountryCode = mapped[0]['code']!;
+            }
           });
         }
       }
