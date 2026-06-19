@@ -22,11 +22,12 @@ class AuthController extends ChangeNotifier {
     required String username,
     required String email,
     required String password,
-    required String phone,
+    String? phone,
     required String country,
     required String countryCode,
     required int age,
     String? referralCode,
+    String? gender,
   }) async {
     _isLoading = true;
     _error = null;
@@ -46,6 +47,9 @@ class AuthController extends ChangeNotifier {
       };
       if (referralCode != null && referralCode.isNotEmpty) {
         payload['referralCode'] = referralCode;
+      }
+      if (gender != null && gender.isNotEmpty) {
+        payload['gender'] = gender;
       }
 
       final res = await _apiService.post(Endpoints.register, body: payload);

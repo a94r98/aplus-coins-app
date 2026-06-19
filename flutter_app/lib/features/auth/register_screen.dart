@@ -24,6 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _referralCtrl = TextEditingController();
   String _selectedCountry = 'Saudi Arabia';
   String _selectedCountryCode = '+966';
+  String _selectedGender = 'MALE';
   bool _obscurePassword = true;
 
   List<Map<String, String>> _dynamicCountries = [
@@ -35,6 +36,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
+    // Auto detect device locale from default list first
+    final deviceCountryCode = WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+    final matchedIdx = _dynamicCountries.indexWhere((c) => c['rawCode'] == deviceCountryCode);
+    if (matchedIdx != -1) {
+      _selectedCountry = _dynamicCountries[matchedIdx]['name']!;
+      _selectedCountryCode = _dynamicCountries[matchedIdx]['code']!;
+    } else {
+      _selectedCountry = 'Saudi Arabia';
+      _selectedCountryCode = '+966';
+    }
     _fetchCountries();
   }
 
@@ -60,13 +71,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (mapped.isNotEmpty) {
           setState(() {
             _dynamicCountries = mapped;
-            final defaultIdx = mapped.indexWhere((c) => c['rawCode'] == 'SA');
-            if (defaultIdx != -1) {
-              _selectedCountry = mapped[defaultIdx]['name']!;
-              _selectedCountryCode = mapped[defaultIdx]['code']!;
+            final deviceCountryCode = WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+            final matchedIdx = mapped.indexWhere((c) => c['rawCode'] == deviceCountryCode);
+            
+            if (matchedIdx != -1) {
+              _selectedCountry = mapped[matchedIdx]['name']!;
+              _selectedCountryCode = mapped[matchedIdx]['code']!;
             } else {
-              _selectedCountry = mapped[0]['name']!;
-              _selectedCountryCode = mapped[0]['code']!;
+              final defaultIdx = mapped.indexWhere((c) => c['rawCode'] == 'SA');
+              if (defaultIdx != -1) {
+                _selectedCountry = mapped[defaultIdx]['name']!;
+                _selectedCountryCode = mapped[defaultIdx]['code']!;
+              } else {
+                _selectedCountry = mapped[0]['name']!;
+                _selectedCountryCode = mapped[0]['code']!;
+              }
             }
           });
         }
@@ -99,11 +118,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       username: _nameCtrl.text.trim(),
       email: _emailCtrl.text.trim(),
       password: _passwordCtrl.text,
-      phone: _phoneCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
       country: _selectedCountry,
       countryCode: rawCode,
       age: int.tryParse(_ageCtrl.text.trim()) ?? 18,
       referralCode: _referralCtrl.text.trim().isEmpty ? null : _referralCtrl.text.trim(),
+      gender: _selectedGender,
     );
     if (!mounted) return;
     if (ok) {
@@ -259,9 +279,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     labelText: isAr ? 'رقم الهاتف' : 'Phone Number',
                                     prefixIcon: const Icon(Icons.phone_outlined),
                                   ),
-                                  validator: (v) => (v == null || v.trim().isEmpty)
-                                      ? (isAr ? 'الهاتف مطلوب' : 'Phone required')
-                                      : null,
+                                  validator: (v) {
+                                    if (v != null && v.trim().isNotEmpty) {
+                                      if (v.trim().length < 5) {
+                                        return isAr ? 'رقم الهاتف قصير جداً' : 'Phone number too short';
+                                      }
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
                             ],
@@ -283,6 +308,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 return isAr ? 'العمر يجب أن يكون بين 16-100' : 'Age must be 16-100';
                               }
                               return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          // Gender
+                          DropdownButtonFormField<String>(
+                            value: _selectedGender,
+                            dropdownColor: AppColors.surface,
+                            style: const TextStyle(color: AppColors.textPrimary, fontFamily: 'Cairo'),
+                            decoration: InputDecoration(
+                              labelText: isAr ? 'الجنس' : 'Gender',
+                              prefixIcon: const Icon(Icons.wc_outlined),
+                            ),
+                            items: [
+                              DropdownMenuItem(
+                                value: 'MALE',
+                                child: Text(isAr ? 'ذكر' : 'Male', style: const TextStyle(fontFamily: 'Cairo')),
+                              ),
+                              DropdownMenuItem(
+                                value: 'FEMALE',
+                                child: Text(isAr ? 'أنثى' : 'Female', style: const TextStyle(fontFamily: 'Cairo')),
+                              ),
+                            ],
+                            onChanged: (val) {
+                              if (val != null) {
+                                setState(() {
+                                  _selectedGender = val;
+                                });
+                              }
                             },
                           ),
                           const SizedBox(height: 14),
