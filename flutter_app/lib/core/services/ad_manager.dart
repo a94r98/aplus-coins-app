@@ -4,6 +4,8 @@ import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import 'package:startapp_sdk/startapp.dart';
 
 class AdManager {
+  static const bool useTestMode = true; // Set to false for production release
+
   static bool _initialized = false;
   static StartAppSdk? _startAppSdk;
 
@@ -23,7 +25,7 @@ class AdManager {
     try {
       await UnityAds.init(
         gameId: '800076563', // Unity Game ID
-        testMode: false, // Set to false for production
+        testMode: useTestMode, // Enable test ads if useTestMode is true
         onComplete: () {
           debugPrint('✅ Unity Ads SDK initialized.');
           // Pre-load Unity ads
@@ -40,6 +42,10 @@ class AdManager {
     // 3. Initialize Start.io
     try {
       _startAppSdk = StartAppSdk();
+      if (useTestMode) {
+        _startAppSdk!.setTestAdsEnabled(true);
+        debugPrint('⚠️ StartApp Test Ads mode enabled.');
+      }
       debugPrint('✅ StartApp SDK initialized.');
     } catch (e) {
       debugPrint('❌ StartApp SDK initialization error: $e');
@@ -53,8 +59,10 @@ class AdManager {
     required Function() onUserEarnedReward,
     required Function(String error) onAdFailed,
   }) {
-    // Production AdMob Rewarded unit ID
-    final adUnitId = 'ca-app-pub-8139134711286467/3301002637'; 
+    // Official Google AdMob Test Rewarded Ad Unit ID vs Production ID
+    final adUnitId = useTestMode 
+        ? 'ca-app-pub-3940256099942544/5224354917' 
+        : 'ca-app-pub-8139134711286467/3301002637'; 
 
     RewardedAd.load(
       adUnitId: adUnitId,
