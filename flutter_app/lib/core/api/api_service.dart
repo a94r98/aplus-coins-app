@@ -43,7 +43,7 @@ class ApiService {
     try {
       final uri = Uri.parse('${AppConfig.baseUrl}$path');
       final headers = await _getHeaders();
-      final response = await _client.get(uri, headers: headers).timeout(const Duration(seconds: 10));
+      final response = await _client.get(uri, headers: headers).timeout(const Duration(seconds: 45));
       
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(response.body) as Map<String, dynamic>;
@@ -67,7 +67,7 @@ class ApiService {
         uri,
         headers: headers,
         body: body != null ? jsonEncode(body) : null,
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 45));
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -96,7 +96,7 @@ class ApiService {
         uri,
         headers: headers,
         body: body != null ? jsonEncode(body) : null,
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 45));
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(response.body) as Map<String, dynamic>;
@@ -113,7 +113,7 @@ class ApiService {
     try {
       final uri = Uri.parse('${AppConfig.baseUrl}$path');
       final headers = await _getHeaders();
-      final response = await _client.delete(uri, headers: headers).timeout(const Duration(seconds: 10));
+      final response = await _client.delete(uri, headers: headers).timeout(const Duration(seconds: 45));
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(response.body) as Map<String, dynamic>;
